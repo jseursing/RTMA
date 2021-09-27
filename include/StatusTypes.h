@@ -1,0 +1,148 @@
+#pragma once
+
+// Disable enum class warnings
+#pragma warning(push)
+#pragma warning(disable : 26812)
+
+// Class definition
+class StatusTypes
+{
+public:
+
+  // The source of the error
+  enum ErrorSrcEnum
+  {
+    INVALID_SRC,
+    BUFFER_MGR = 1,
+    INITTABLE  = 2,
+    MSGQ_MGR   = 3,
+    MEM_MGR    = 4,
+    SEM_MGR    = 5,
+    UDP_MGR    = 6,
+    TASK_MGR   = 7,
+    TIMER_MGR  = 8,
+    XML_PARSER = 9,
+    API_MGR    = 10,    
+    MAX_SRC
+  };
+
+  // The category of the error
+  enum ErrorCatEnum
+  {
+    INVALID_CATEGORY,
+    NO_RESOURCES  = 1,
+    INIT_FAILED   = 2,
+    INVALID_ID    = 3,
+    TIMEOUT       = 4,
+    INVALID_OBJ   = 5,
+    NOT_OWNER     = 6,
+    OS_ERROR      = 7,
+    STATE_ERROR   = 8,
+    INVALID_COUNT = 9,
+    MAX_CATEGORY
+  };
+
+  // The type of the error
+  enum ErrorTypeEnum
+  {
+    INVALID_TYPE,
+    SOURCE         = 1,
+    DESTINATION    = 2,
+    ALLOCATED      = 3,
+    RELEASED       = 4,
+    MEM_ERROR      = 5,
+    MAX_TYPE
+  };
+
+  #define ERR_STATUS(src,cat,code) ((src << 24) | (cat << 16) | code)
+  enum StatusEnum
+  {
+    STATUS_OK            = 0,
+    STATUS_ERROR_TIMEOUT = 1,
+
+    // MsgQ     
+    MSGQ_ALREADY_INIT    = ERR_STATUS(MSGQ_MGR, INIT_FAILED,      ALLOCATED),
+    MSGQ_INVALID_IN_OBJ  = ERR_STATUS(MSGQ_MGR, INVALID_OBJ,    DESTINATION),
+    MSGQ_INVALID_OUT_OBJ = ERR_STATUS(MSGQ_MGR, INVALID_OBJ,         SOURCE),
+    MSGQ_ALREADY_QUEUED  = ERR_STATUS(MSGQ_MGR, INVALID_OBJ,      ALLOCATED),
+    MSGQ_NOT_ON_QUEUE    = ERR_STATUS(MSGQ_MGR, INVALID_OBJ,       RELEASED),
+    MSGQ_INVALID_QUEUE   = ERR_STATUS(MSGQ_MGR, INVALID_ID,               0),
+
+    // UDP Manager
+    UDP_ALREADY_INIT     = ERR_STATUS(UDP_MGR,    INIT_FAILED,    ALLOCATED),
+    UDP_INVALID_ID       = ERR_STATUS(UDP_MGR,    INVALID_ID,             0),
+    UDP_INVALID_SCKT     = ERR_STATUS(UDP_MGR,    INVALID_ID,             1),
+    UDP_INIT_LIB_ERROR   = ERR_STATUS(UDP_MGR,    OS_ERROR,               0),
+    UDP_SCKT_INIT_ERROR  = ERR_STATUS(UDP_MGR,    OS_ERROR,               1),
+    UDP_SCKT_BIND_ERROR  = ERR_STATUS(UDP_MGR,    OS_ERROR,               2),
+    UDP_SCKT_SEND_ERROR  = ERR_STATUS(UDP_MGR,    OS_ERROR,               3),
+    UDP_SCKT_RECV_ERROR  = ERR_STATUS(UDP_MGR,    OS_ERROR,               4),
+    UDP_SCKT_SELECT_ERR  = ERR_STATUS(UDP_MGR,    OS_ERROR,               5),
+    UDP_SCKT_NO_DATA     = ERR_STATUS(UDP_MGR,    TIMEOUT,                0),
+
+    // Buffer Manager
+    BUFMGR_ALREADY_INIT  = ERR_STATUS(BUFFER_MGR, INIT_FAILED,    ALLOCATED),
+    BUFMGR_INIT_FAILURE  = ERR_STATUS(BUFFER_MGR, INIT_FAILED,    MEM_ERROR),
+    BUFMGR_NO_POOL       = ERR_STATUS(BUFFER_MGR, NO_RESOURCES,   MEM_ERROR),
+    BUFMGR_POOL_EMPTY    = ERR_STATUS(BUFFER_MGR, NO_RESOURCES,      SOURCE),
+    BUFMGR_ALLOC_ERROR   = ERR_STATUS(BUFFER_MGR, NO_RESOURCES,           0),
+    BUFMGR_POOL_FULL     = ERR_STATUS(BUFFER_MGR, INVALID_OBJ,  DESTINATION),
+    BUFMGR_RELEASE_ERR   = ERR_STATUS(BUFFER_MGR, INVALID_OBJ,            0),
+    BUFMGR_INVALID_OBJ   = ERR_STATUS(BUFFER_MGR, INVALID_OBJ,       SOURCE),
+    BUFMGR_NOT_OWNER     = ERR_STATUS(BUFFER_MGR, NOT_OWNER,              0),
+
+    // Timer Manager
+    TIMER_ALREADY_INIT   = ERR_STATUS(TIMER_MGR, INIT_FAILED,    ALLOCATED),
+    TIMER_START_ERROR    = ERR_STATUS(TIMER_MGR, OS_ERROR,               0),
+    TIMER_CANCEL_ERROR   = ERR_STATUS(TIMER_MGR, OS_ERROR,               1),
+    TIMER_INVALID_TIMER  = ERR_STATUS(TIMER_MGR, NO_RESOURCES,           0),
+    TIMER_ALLOC_ERROR    = ERR_STATUS(TIMER_MGR, NO_RESOURCES,   ALLOCATED),
+    TIMER_RELEASE_ERROR  = ERR_STATUS(TIMER_MGR, NO_RESOURCES,    RELEASED),
+    TIMER_NOT_ALLOCATED  = ERR_STATUS(TIMER_MGR, NOT_OWNER,              0),
+    TIMER_INVALID_ID     = ERR_STATUS(TIMER_MGR, INVALID_ID,             0),
+
+    // Memory Manager
+    MEMMGR_ALREADY_INIT  = ERR_STATUS(MEM_MGR, INIT_FAILED,      ALLOCATED),    
+    MEMMGR_INIT_FAILURE  = ERR_STATUS(MEM_MGR, INIT_FAILED,      MEM_ERROR),
+    MEMMGR_INVALID_ID    = ERR_STATUS(MEM_MGR, INVALID_ID,               0),
+    MEMMGR_INVALID_SPEC  = ERR_STATUS(MEM_MGR, NO_RESOURCES,             0),
+    MEMMGR_ALLOC_ERROR   = ERR_STATUS(MEM_MGR, NO_RESOURCES,     ALLOCATED),
+    MEMMGR_INVALID_OBJ   = ERR_STATUS(MEM_MGR, INVALID_OBJ,              0),
+
+    // Semaphore Manager
+    SEMMGR_ALREADY_INIT  = ERR_STATUS(SEM_MGR, INIT_FAILED,      ALLOCATED),
+    SEMMGR_INVALID_ID    = ERR_STATUS(SEM_MGR, NO_RESOURCES,             0),
+    SEMMGR_GIVE_ERROR    = ERR_STATUS(SEM_MGR, OS_ERROR,                 0),
+    SEMMGR_TAKE_ERROR    = ERR_STATUS(SEM_MGR, OS_ERROR,                 1),
+
+    // Task Manager
+    TASKMGR_ALREADY_INIT = ERR_STATUS(TASK_MGR, INIT_FAILED,     ALLOCATED),
+    TASKMGR_TASK_ERROR   = ERR_STATUS(TASK_MGR, OS_ERROR,                0),
+    TASKMGR_TASK_ACTIVE  = ERR_STATUS(TASK_MGR, STATE_ERROR,             0),
+    TASKMGR_INVALID_ID   = ERR_STATUS(TASK_MGR, INVALID_ID,              0),
+
+    // XML Parser
+    XML_INVALID_FILE     = ERR_STATUS(XML_PARSER, INIT_FAILED,           0),
+    XML_PARSE_ERROR      = ERR_STATUS(XML_PARSER, MEM_ERROR,             0),
+  
+    // API Manager
+    API_BUFMGR_COUNT     = ERR_STATUS(BUFFER_MGR, INVALID_COUNT,          0),
+    API_BUFMGR_DUP_ID    = ERR_STATUS(BUFFER_MGR, INVALID_COUNT,          1),
+    API_BUFMGR_INV_ID    = ERR_STATUS(BUFFER_MGR, INVALID_ID,             0),
+    API_BUFMGR_SIZE_ERR  = ERR_STATUS(BUFFER_MGR, 0,                      0),
+    API_MEMMGR_COUNT     = ERR_STATUS(MEM_MGR,   INVALID_COUNT,           0),
+    API_MEMMGR_DUP_ID    = ERR_STATUS(MEM_MGR,   INVALID_COUNT,           1),
+    API_MSGQ_COUNT       = ERR_STATUS(MSGQ_MGR,  INVALID_COUNT,           0),
+    API_MSGQ_DUP_ID      = ERR_STATUS(MSGQ_MGR,  INVALID_COUNT,           1),
+    API_UDP_COUNT        = ERR_STATUS(UDP_MGR,   INVALID_COUNT,           0),
+    API_UDP_DUP_ID       = ERR_STATUS(UDP_MGR,   INVALID_COUNT,           1),
+    API_TIMER_COUNT      = ERR_STATUS(TIMER_MGR, INVALID_COUNT,           0),
+    API_TIMER_DUP_ID     = ERR_STATUS(TIMER_MGR, INVALID_COUNT,           1),
+    API_SEM_COUNT        = ERR_STATUS(SEM_MGR,   INVALID_COUNT,           0),
+    API_SEM_DUP_ID       = ERR_STATUS(SEM_MGR,   INVALID_COUNT,           1),
+    API_TASK_COUNT       = ERR_STATUS(TASK_MGR,  INVALID_COUNT,           0),
+    API_TASK_DUP_ID      = ERR_STATUS(TASK_MGR,  INVALID_COUNT,           1),
+
+    STATUS_ERROR = -1
+  };
+};
